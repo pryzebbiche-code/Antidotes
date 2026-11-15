@@ -41,21 +41,22 @@ vercel.json        en-têtes de sécurité (CSP, HSTS…)
    |---|---|---|
    | `SESSION_SECRET` | chaîne aléatoire de 32+ caractères (`openssl rand -hex 32`) | oui |
    | `ADMIN_USERNAMES` | identifiant(s) de la coordination, séparés par des virgules (ex. `coordination.cap`) | oui |
-   | `REGISTRATION_CODE` | code à communiquer aux pharmaciens pour pouvoir créer un compte | recommandé |
-   | `REQUIRE_APPROVAL` | `true` : chaque nouveau compte doit être activé par la coordination | recommandé |
-5. **Redéployer** (*Deployments → Redeploy*) pour prendre en compte les variables.
-6. **Créer le compte de coordination** : ouvrez le site, onglet *Créer un compte*, avec l'identifiant
-   exact indiqué dans `ADMIN_USERNAMES`. Ce compte est actif immédiatement et voit les onglets
-   *Consolidation* et *Comptes*.
-7. **Diffuser** l'adresse du site et le code d'inscription aux pharmaciens hospitaliers.
-   Activez leurs comptes dans l'onglet *Comptes*.
+   | `ADMIN_PASSWORD` | mot de passe initial de l'administrateur (8+ caractères, lettre et chiffre) | oui |
+   | `REQUIRE_APPROVAL` | `true` (défaut) : chaque compte pharmacien est activé par la coordination ; `false` : actif immédiatement | non |
+5. **Redéployer** (*Deployments → ⋯ → Redeploy*) pour prendre en compte les variables.
+6. **Première connexion administrateur** : ouvrez le site, onglet **Coordination**, saisissez l'identifiant
+   de `ADMIN_USERNAMES` et le mot de passe `ADMIN_PASSWORD`. Le compte est créé à ce moment-là.
+   Changez ensuite le mot de passe dans *Mon compte* (la variable `ADMIN_PASSWORD` ne sert plus après ce premier accès).
+   Les identifiants administrateurs ne peuvent pas être pris par une inscription publique.
+7. **Diffuser** l'adresse du site aux pharmaciens hospitaliers : ils créent leur compte (onglet *Créer un compte*),
+   puis vous les activez dans l'onglet *Comptes*.
 
 ## Fonctionnement
 
-- **Pharmacien** : création de compte, connexion, fiche (établissement, 23 antidotes, lots), brouillon
+- **Pharmacien** : création de compte (activé ensuite par la coordination), connexion, fiche (établissement, 23 antidotes, lots), brouillon
   conservé sur l'appareil, transmission versionnée (les 20 dernières versions sont gardées), changement
   de mot de passe. Il ne voit que sa propre fiche.
-- **Coordination** : tableau de consolidation (établissements, wilayas couvertes, fiches de plus de 30 jours,
+- **Coordination** : connexion dédiée (onglet *Coordination*), tableau de consolidation (établissements, wilayas couvertes, fiches de plus de 30 jours,
   antidotes sans détenteur, lots périmant sous 3 mois), détail par établissement, exports CSV/JSON,
   activation / désactivation des comptes, attribution du rôle coordination, mot de passe provisoire.
 
@@ -64,6 +65,7 @@ vercel.json        en-têtes de sécurité (CSP, HSTS…)
 - Mots de passe hachés (bcrypt), jamais stockés en clair ; 8 caractères minimum avec lettre et chiffre.
 - Session par cookie signé (HMAC-SHA256), `HttpOnly`, `Secure`, `SameSite=Lax`, durée 8 h.
 - Limitation des tentatives de connexion (par identifiant et par adresse IP) et des créations de compte.
+- Identifiants administrateurs réservés ; l'espace coordination refuse les comptes pharmaciens.
 - Contrôle d'accès côté serveur : un pharmacien ne peut lire que sa fiche ; les routes `admin/` vérifient le rôle.
 - Contrôle et normalisation de chaque fiche côté serveur ; en-têtes de sécurité (CSP stricte, HSTS, anti-iframe).
 - Aucune donnée patient collectée.

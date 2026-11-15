@@ -1,0 +1,13 @@
+{
+  "name": "antidotes-dz-disponibilite",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ANTI-DOTES DZ — saisie de la disponibilité des antidotes par les pharmacies hospitalières",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": { "dev": "vercel dev" },
+  "dependencies": {
+    "@upstash/redis": "^1.41.0",
+    "bcryptjs": "^3.0.3"
+  }
+}
